@@ -18,6 +18,7 @@ public class Fusca extends Vehicle {
         this.engineStartSoundPath = "src/assets/vehicles/sound/fusca_start1600.wav";
         this.soundIdlePath = "src/assets/vehicles/sound/fusca_idle1600.wav";
         this.soundDrivingPath = "src/assets/vehicles/sound/fusca_run.wav";
+        this.engineStopSoundPath = "src/assets/vehicles/sound/fusca_stop.wav";
     }
 
     @Override

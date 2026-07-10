@@ -3,8 +3,8 @@ import javax.swing.*;
 public class Main extends JFrame {
 
     public Main() {
-        setTitle("Hill Climb: The game");
-        setResizable(false);
+        setTitle("2D Car Game");
+        setResizable(true);
 
         GamePanel gamePanel = new GamePanel();
         add(gamePanel);

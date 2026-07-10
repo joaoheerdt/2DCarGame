@@ -22,6 +22,7 @@ public abstract class Vehicle {
     private float baseDrivingSampleRate = 44100.0f;
 
     protected String engineStartSoundPath;
+    protected String engineStopSoundPath;
     protected String soundIdlePath;
     protected String soundDrivingPath;
 
@@ -41,16 +42,19 @@ public abstract class Vehicle {
     }
 
     public void toggleEngine() {
-        this.isEngineOn = !this.isEngineOn;
-
         if (this.isEngineOn) {
+            if (engineStopSoundPath != null) {
+                playSound(engineStopSoundPath);
+            }
+            stopEngineSounds();
+            this.isEngineOn = false;
+        } else {
+            this.isEngineOn = true;
             if (engineStartSoundPath != null) {
                 playStartSequence(engineStartSoundPath);
             } else {
                 startEngineSounds();
             }
-        } else {
-            stopEngineSounds();
         }
     }
 
@@ -64,17 +68,13 @@ public abstract class Vehicle {
 
                 try {
                     FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                    float novoVolume = 5.0f;
+                    float novoVolume = 6.0f;
                     if (novoVolume > gainControl.getMaximum()) novoVolume = gainControl.getMaximum();
                     gainControl.setValue(novoVolume);
-                } catch (Exception e) {
-                    System.out.println("Não foi possível ajustar o volume deste áudio.");
-                }
+                } catch (Exception e) {}
 
                 clip.start();
-            } catch (Exception e) {
-                System.out.println("Erro ao tocar o som: " + e.getMessage());
-            }
+            } catch (Exception e) {}
         }).start();
     }
 
@@ -93,7 +93,6 @@ public abstract class Vehicle {
                     startEngineSounds();
                 }
             } catch (Exception e) {
-                System.out.println("Erro na sequencia de partida: " + e.getMessage());
                 if (this.isEngineOn) {
                     startEngineSounds();
                 }
@@ -134,9 +133,7 @@ public abstract class Vehicle {
                     engineIdleClip.loop(Clip.LOOP_CONTINUOUSLY);
                     engineIdleClip.start();
                 }
-            } catch (Exception e) {
-                System.out.println("Erro ao inicializar loops de áudio: " + e.getMessage());
-            }
+            } catch (Exception e) {}
         }).start();
     }
 
@@ -175,13 +172,7 @@ public abstract class Vehicle {
             if (newRate > rateControl.getMaximum()) newRate = rateControl.getMaximum();
             if (newRate < rateControl.getMinimum()) newRate = rateControl.getMinimum();
             rateControl.setValue(newRate);
-        } catch (Exception e) {
-            try {
-                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                float volume = (float) (Math.log10(rpm / 1000.0) * 20.0);
-                setClipVolume(clip, volume);
-            } catch (Exception ex) {}
-        }
+        } catch (Exception e) {}
     }
 
     public void updateEngineSound() {
@@ -199,7 +190,8 @@ public abstract class Vehicle {
                 engineDrivingClip.start();
             }
 
-            setClipVolume(engineDrivingClip, -10.0f);
+            float volume = (float) (Math.log10(currentRpm / 1000.0) * 10.0) - 10.0f;
+            setClipVolume(engineDrivingClip, volume);
             applyPitch(engineDrivingClip, baseDrivingSampleRate, currentRpm);
 
         } else {
@@ -212,7 +204,7 @@ public abstract class Vehicle {
                 engineIdleClip.start();
             }
 
-            setClipVolume(engineIdleClip, 0.0f);
+            setClipVolume(engineIdleClip, 2.0f);
             applyPitch(engineIdleClip, baseIdleSampleRate, currentRpm);
         }
     }
@@ -221,10 +213,8 @@ public abstract class Vehicle {
         if (newGear >= 0 && newGear < gearRatios.length) {
             double oldRatio = (currentGear == 0) ? 1.0 : gearRatios[currentGear];
             double newRatio = (newGear == 0) ? 1.0 : gearRatios[newGear];
-
             this.currentRpm *= (newRatio / oldRatio);
             this.currentGear = newGear;
-
             playSound("src/assets/vehicles/sound/Gear.wav");
         }
     }
