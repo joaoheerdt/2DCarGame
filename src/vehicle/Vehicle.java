@@ -41,6 +41,14 @@ public abstract class Vehicle {
         return isEngineOn;
     }
 
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
     public void toggleEngine() {
         if (this.isEngineOn) {
             if (engineStopSoundPath != null) {
@@ -71,10 +79,12 @@ public abstract class Vehicle {
                     float novoVolume = 6.0f;
                     if (novoVolume > gainControl.getMaximum()) novoVolume = gainControl.getMaximum();
                     gainControl.setValue(novoVolume);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
 
                 clip.start();
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }).start();
     }
 
@@ -133,7 +143,8 @@ public abstract class Vehicle {
                     engineIdleClip.loop(Clip.LOOP_CONTINUOUSLY);
                     engineIdleClip.start();
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }).start();
     }
 
@@ -159,7 +170,8 @@ public abstract class Vehicle {
             if (volume > gainControl.getMaximum()) volume = gainControl.getMaximum();
             if (volume < gainControl.getMinimum()) volume = gainControl.getMinimum();
             gainControl.setValue(volume);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     private void applyPitch(Clip clip, float baseSampleRate, double rpm) {
@@ -172,7 +184,8 @@ public abstract class Vehicle {
             if (newRate > rateControl.getMaximum()) newRate = rateControl.getMaximum();
             if (newRate < rateControl.getMinimum()) newRate = rateControl.getMinimum();
             rateControl.setValue(newRate);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     public void updateEngineSound() {
@@ -226,9 +239,18 @@ public abstract class Vehicle {
     }
 
     public abstract void updatePhysics(boolean isAccelerating, boolean isBraking);
+
     public abstract void draw(Graphics2D g2d, Component component);
 
-    public double getCurrentSpeed() { return this.speed; }
-    public double getCurrentRpm() { return this.currentRpm; }
-    public int getCurrentGear() { return this.currentGear; }
+    public double getCurrentSpeed() {
+        return this.speed;
+    }
+
+    public double getCurrentRpm() {
+        return this.currentRpm;
+    }
+
+    public int getCurrentGear() {
+        return this.currentGear;
+    }
 }

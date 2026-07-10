@@ -4,7 +4,7 @@ public class Main extends JFrame {
 
     public Main() {
         setTitle("2D Car Game");
-        setResizable(true);
+        setResizable(false);
 
         GamePanel gamePanel = new GamePanel();
         add(gamePanel);
