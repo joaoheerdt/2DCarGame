@@ -1,6 +1,4 @@
-package assets.vehicles.fusca;
-
-import assets.vehicles.Vehicle;
+package vehicle;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -8,7 +6,7 @@ import java.awt.geom.AffineTransform;
 public class Fusca extends Vehicle {
 
     public Fusca() {
-        super(50, 280, 300, 150, 67, "src/assets/vehicles/fusca/FuscaVermelho.png", "src/assets/vehicles/fusca/RodaFusca.png");
+        super(50, 280, 300, 150, 67, "src/assets/vehicles/FuscaVermelho.png", "src/assets/vehicles/RodaFusca.png");
         this.maxRpm = 5000.0;
         this.baseTorque = 150.0;
         this.mass = 800.0;

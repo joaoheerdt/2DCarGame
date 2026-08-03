@@ -1,4 +1,4 @@
-package assets.vehicles;
+package vehicle;
 
 import javax.sound.sampled.*;
 import java.io.File;

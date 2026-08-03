@@ -1,4 +1,4 @@
-package assets.vehicles;
+package vehicle;
 
 import java.awt.*;
 import javax.sound.sampled.*;
@@ -26,9 +26,6 @@ public abstract class Vehicle {
     protected String soundIdlePath;
     protected String soundDrivingPath;
 
-
-    protected int volumeEfeitos = 80;
-
     public Vehicle(int x, int y, int width, int height, int wheelSize, String bodyPath, String wheelPath) {
         this.x = x;
         this.y = y;
@@ -38,11 +35,6 @@ public abstract class Vehicle {
         this.bodyImage = new ImageIcon(bodyPath).getImage();
         this.wheelImage = new ImageIcon(wheelPath).getImage();
         this.wheelAngle = 0;
-    }
-
-    public void setVolumeEfeitos(int volume) {
-        this.volumeEfeitos = Math.max(0, Math.min(100, volume));
-        updateEngineSound();
     }
 
     public boolean isEngineOn() {
@@ -74,12 +66,6 @@ public abstract class Vehicle {
         }
     }
 
-    private float calcularAtenuacaoDB() {
-        if (this.volumeEfeitos >= 100) return 0.0f;
-        if (this.volumeEfeitos <= 0) return -80.0f; // Mute
-        return -40.0f * (1.0f - (this.volumeEfeitos / 100.0f));
-    }
-
     protected void playSound(String path) {
         new Thread(() -> {
             try {
@@ -90,22 +76,15 @@ public abstract class Vehicle {
 
                 try {
                     FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                    float finalVolumeDB;
-
-                    if (this.volumeEfeitos == 0) {
-                        finalVolumeDB = gainControl.getMinimum();
-                    } else {
-                        // Aplica a atenuação ao volume máximo do som rápido (como a marcha)
-                        finalVolumeDB = 6.0f + calcularAtenuacaoDB();
-                    }
-
-                    if (finalVolumeDB > gainControl.getMaximum()) finalVolumeDB = gainControl.getMaximum();
-                    if (finalVolumeDB < gainControl.getMinimum()) finalVolumeDB = gainControl.getMinimum();
-                    gainControl.setValue(finalVolumeDB);
-                } catch (Exception e) {}
+                    float novoVolume = 6.0f;
+                    if (novoVolume > gainControl.getMaximum()) novoVolume = gainControl.getMaximum();
+                    gainControl.setValue(novoVolume);
+                } catch (Exception e) {
+                }
 
                 clip.start();
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }).start();
     }
 
@@ -116,11 +95,8 @@ public abstract class Vehicle {
                 AudioInputStream ais = AudioSystem.getAudioInputStream(file);
                 engineStartClip = AudioSystem.getClip();
                 engineStartClip.open(ais);
-
-                // Aplica o volume inicial
-                setClipVolume(engineStartClip, 2.0f);
-
                 engineStartClip.start();
+
                 Thread.sleep(engineStartClip.getMicrosecondLength() / 1000);
 
                 if (this.isEngineOn) {
@@ -164,15 +140,15 @@ public abstract class Vehicle {
                 }
 
                 if (engineIdleClip != null && this.isEngineOn) {
-                    setClipVolume(engineIdleClip, 2.0f);
                     engineIdleClip.loop(Clip.LOOP_CONTINUOUSLY);
                     engineIdleClip.start();
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }).start();
     }
 
-    public void stopEngineSounds() {
+    private void stopEngineSounds() {
         if (engineStartClip != null && engineStartClip.isRunning()) {
             engineStartClip.stop();
             engineStartClip.close();
@@ -187,24 +163,15 @@ public abstract class Vehicle {
         }
     }
 
-    private void setClipVolume(Clip clip, float baseVolumeDB) {
-        if (clip == null || !clip.isOpen()) return;
-
+    private void setClipVolume(Clip clip, float volume) {
+        if (clip == null || !clip.isRunning()) return;
         try {
             FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            float finalVolumeDB;
-
-            if (this.volumeEfeitos == 0) {
-                finalVolumeDB = gainControl.getMinimum();
-            } else {
-                // Soma a atenuação agressiva à base do volume calculada pela física do carro
-                finalVolumeDB = baseVolumeDB + calcularAtenuacaoDB();
-            }
-
-            if (finalVolumeDB > gainControl.getMaximum()) finalVolumeDB = gainControl.getMaximum();
-            if (finalVolumeDB < gainControl.getMinimum()) finalVolumeDB = gainControl.getMinimum();
-            gainControl.setValue(finalVolumeDB);
-        } catch (Exception e) {}
+            if (volume > gainControl.getMaximum()) volume = gainControl.getMaximum();
+            if (volume < gainControl.getMinimum()) volume = gainControl.getMinimum();
+            gainControl.setValue(volume);
+        } catch (Exception e) {
+        }
     }
 
     private void applyPitch(Clip clip, float baseSampleRate, double rpm) {
@@ -217,7 +184,8 @@ public abstract class Vehicle {
             if (newRate > rateControl.getMaximum()) newRate = rateControl.getMaximum();
             if (newRate < rateControl.getMinimum()) newRate = rateControl.getMinimum();
             rateControl.setValue(newRate);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     public void updateEngineSound() {
@@ -260,7 +228,7 @@ public abstract class Vehicle {
             double newRatio = (newGear == 0) ? 1.0 : gearRatios[newGear];
             this.currentRpm *= (newRatio / oldRatio);
             this.currentGear = newGear;
-            playSound("src/assets/vehicles/fusca/sound/Gear.wav");
+            playSound("src/assets/vehicles/sound/Gear.wav");
         }
     }
 
@@ -274,7 +242,15 @@ public abstract class Vehicle {
 
     public abstract void draw(Graphics2D g2d, Component component);
 
-    public double getCurrentSpeed() { return this.speed; }
-    public double getCurrentRpm() { return this.currentRpm; }
-    public int getCurrentGear() { return this.currentGear; }
+    public double getCurrentSpeed() {
+        return this.speed;
+    }
+
+    public double getCurrentRpm() {
+        return this.currentRpm;
+    }
+
+    public int getCurrentGear() {
+        return this.currentGear;
+    }
 }
