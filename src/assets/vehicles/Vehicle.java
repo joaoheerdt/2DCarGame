@@ -27,7 +27,7 @@ public abstract class Vehicle {
     protected String soundDrivingPath;
 
 
-    protected int volumeEfeitos = 80;
+    protected int volumeEfeitos = 50;
 
     public Vehicle(int x, int y, int width, int height, int wheelSize, String bodyPath, String wheelPath) {
         this.x = x;

@@ -7,7 +7,7 @@ public class AudioGame {
 
     public static void playSoundGear(String path) {
         try {
-            File soundFile = new File("src/assets/vehicles/sound/Gear.wav");
+            File soundFile = new File("src/assets/vehicles/fusca/sound/Gear.wav");
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
             Clip clip = AudioSystem.getClip();
             clip.open(audioStream);
