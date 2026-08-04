@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vehicles>
+
+    <vehicle id="fusca">
+        <name>Fusca 1600</name>
+        <width>300</width>
+        <height>150</height>
+        <wheelSize>67</wheelSize>
+        <mass>800.0</mass>
+        <baseTorque>150.0</baseTorque>
+        <maxRpm>5000.0</maxRpm>
+        <speedMax>110</speedMax>
+        <gearRatios>1.0,3.8,2.0,1.2,0.9</gearRatios>
+
+        <sprites body="src/assets/vehicles/FuscaVermelho.png" wheel="src/assets/vehicles/RodaFusca.png"/>
+
+        <sounds start="src/assets/vehicles/sound/fusca_start1600.wav"
+                idle="src/assets/vehicles/sound/fusca_idle1600.wav"
+                run="src/assets/vehicles/sound/fusca_run.wav"
+                stop="src/assets/vehicles/sound/fusca_stop.wav"/>
+    </vehicle>
+
+</vehicles>
