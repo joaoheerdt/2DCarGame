@@ -8,6 +8,10 @@ import map.GameMap;
 import sound.AudioManager;
 
 public class GamePanel extends JPanel implements ActionListener {
+    // 1. Definição do Canvas Virtual (Referência Base de Altura 720p)
+    private final int VIRTUAL_WIDTH = 1280;
+    private final int VIRTUAL_HEIGHT = 720;
+
     private Vehicle activeVehicle;
     private List<Vehicle> garageCars;
     private int currentCarIndex = 0;
@@ -17,7 +21,6 @@ public class GamePanel extends JPanel implements ActionListener {
     private Timer loop;
 
     private enum GameStage {MENU, GARAGE, PLAYING, PAUSED, CONFIG}
-
     private GameStage currentState = GameStage.MENU;
 
     private AudioManager audioManager = new AudioManager();
@@ -33,42 +36,40 @@ public class GamePanel extends JPanel implements ActionListener {
             new ImageIcon("src/assets/menu/exit_button.png").getImage()
     };
 
-    // Botões
+    // 2. Coordenadas base dos botões do menu
     private Rectangle[] buttons = {
-            new Rectangle(250, 220, 300, 60), // 0: JOGAR
-            new Rectangle(40, 500, 60, 60),   // 1: CONFIGURAÇÕES
-            new Rectangle(276, 320, 250, 50), // 2: GARAGEM
-            new Rectangle(700, 500, 60, 60)   // 3: SAIR
+            new Rectangle(490, 320, 300, 60), // 0: JOGAR
+            new Rectangle(50, 600, 60, 60),   // 1: CONFIGURAÇÕES
+            new Rectangle(515, 420, 250, 50), // 2: GARAGEM
+            new Rectangle(1170, 600, 60, 60)  // 3: SAIR
     };
 
-    private Rectangle btnContinuar = new Rectangle(275, 150, 250, 45);
-    private Rectangle btnIrGaragem = new Rectangle(275, 210, 250, 45);
-    private Rectangle btnMenuPrincipal = new Rectangle(275, 270, 250, 45);
+    private Rectangle btnContinuar = new Rectangle(515, 230, 250, 45);
+    private Rectangle btnIrGaragem = new Rectangle(515, 300, 250, 45);
+    private Rectangle btnMenuPrincipal = new Rectangle(515, 370, 250, 45);
 
-    private Rectangle btnMusicaMenos = new Rectangle(280, 340, 45, 40);
-    private Rectangle btnMusicaMais = new Rectangle(475, 340, 45, 40);
-    private Rectangle btnEfeitosMenos = new Rectangle(280, 390, 45, 40);
-    private Rectangle btnEfeitosMais = new Rectangle(475, 390, 45, 40);
+    private Rectangle btnMusicaMenos = new Rectangle(480, 480, 45, 40);
+    private Rectangle btnMusicaMais = new Rectangle(755, 480, 45, 40);
+    private Rectangle btnEfeitosMenos = new Rectangle(480, 540, 45, 40);
+    private Rectangle btnEfeitosMais = new Rectangle(755, 540, 45, 40);
 
     // Botões da Garagem
-    private Rectangle btnCarroAnterior = new Rectangle(150, 280, 60, 60);
-    private Rectangle btnProximoCarro = new Rectangle(590, 280, 60, 60);
-    private Rectangle btnSelecionarCarro = new Rectangle(280, 460, 240, 50);
+    private Rectangle btnCarroAnterior = new Rectangle(200, 400, 60, 60);
+    private Rectangle btnProximoCarro = new Rectangle(1020, 400, 60, 60);
+    private Rectangle btnSelecionarCarro = new Rectangle(520, 620, 240, 50);
 
     private int botaoPressionado = -1;
     private int volumeMusica = 80;
     private int volumeEfeitos = 80;
 
     public GamePanel() {
-        setPreferredSize(new Dimension(800, 600));
         setFocusable(true);
 
-        // Carrega veículos do XML[cite: 2]
         this.garageCars = VehicleLoader.loadVehicles("src/assets/vehicles/vehicles.xml");
         if (this.garageCars != null && !this.garageCars.isEmpty()) {
             this.activeVehicle = this.garageCars.get(currentCarIndex);
-            this.activeVehicle.setX(250);
-            this.activeVehicle.setY(380);
+            this.activeVehicle.setX(480);
+            this.activeVehicle.setY(480);
         }
 
         this.activeMap = new GameMap("src/assets/map/default_map.png");
@@ -78,7 +79,14 @@ public class GamePanel extends JPanel implements ActionListener {
 
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                Point p = e.getPoint();
+                int vWidth = getVirtualWidth();
+
+                buttons[0].x = (vWidth - buttons[0].width) / 2;
+                buttons[2].x = (vWidth - buttons[2].width) / 2;
+                buttons[3].x = vWidth - 110;
+                btnProximoCarro.x = vWidth - 260;
+
+                Point p = getVirtualPoint(e.getPoint());
 
                 if (currentState == GameStage.MENU) {
                     for (int i = 0; i < buttons.length; i++) {
@@ -94,8 +102,8 @@ public class GamePanel extends JPanel implements ActionListener {
                         currentCarIndex = (currentCarIndex - 1 + garageCars.size()) % garageCars.size();
                     } else if (btnSelecionarCarro.contains(p)) {
                         activeVehicle = garageCars.get(currentCarIndex);
-                        activeVehicle.setX(250);
-                        activeVehicle.setY(380);
+                        activeVehicle.setX(480);
+                        activeVehicle.setY(480);
                         currentState = GameStage.MENU;
                     }
                     repaint();
@@ -124,7 +132,8 @@ public class GamePanel extends JPanel implements ActionListener {
             }
 
             public void mouseReleased(MouseEvent e) {
-                if (currentState == GameStage.MENU && botaoPressionado != -1 && buttons[botaoPressionado].contains(e.getPoint())) {
+                Point p = getVirtualPoint(e.getPoint());
+                if (currentState == GameStage.MENU && botaoPressionado != -1 && buttons[botaoPressionado].contains(p)) {
                     executarAcao(botaoPressionado);
                 }
                 botaoPressionado = -1;
@@ -166,12 +175,27 @@ public class GamePanel extends JPanel implements ActionListener {
         loop.start();
     }
 
+    private double getScale() {
+        return (double) getHeight() / VIRTUAL_HEIGHT;
+    }
+
+    private int getVirtualWidth() {
+        return (int) Math.round(getWidth() / getScale());
+    }
+
+    private Point getVirtualPoint(Point p) {
+        double scale = getScale();
+        int virtualX = (int) (p.x / scale);
+        int virtualY = (int) (p.y / scale);
+        return new Point(virtualX, virtualY);
+    }
+
     private void executarAcao(int index) {
         switch (index) {
             case 0:
                 if (activeVehicle != null) {
-                    activeVehicle.setX(50);
-                    activeVehicle.setY(280);
+                    activeVehicle.setX(100);
+                    activeVehicle.setY(350);
                 }
                 currentState = GameStage.PLAYING;
                 break;
@@ -198,31 +222,48 @@ public class GamePanel extends JPanel implements ActionListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
+        Graphics2D g2d = (Graphics2D) g.create();
+
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+
+        double scale = getScale();
+        int virtualWidthAtual = getVirtualWidth();
+
+        g2d.scale(scale, scale);
 
         if (currentState == GameStage.PLAYING || currentState == GameStage.PAUSED) {
-            activeMap.draw(g2d, this);
+
+            if (activeMap != null) {
+                activeMap.draw(g2d, this);
+            }
+
             if (activeVehicle != null) activeVehicle.draw(g2d, this);
 
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.BOLD, 18));
+            g2d.setFont(new Font("Arial", Font.BOLD, 22));
             if (activeVehicle != null) {
                 int currentGear = activeVehicle.getCurrentGear();
                 double visualSpeed = activeVehicle.getCurrentSpeed() * 1.65;
-                g2d.drawString("Gear: " + (currentGear == 0 ? "N" : currentGear), 20, 30);
-                g2d.drawString(String.format("RPM: %.0f", activeVehicle.getCurrentRpm()), 20, 55);
-                g2d.drawString(String.format("Speed: %.0f km/h", visualSpeed), 20, 80);
+                g2d.drawString("Gear: " + (currentGear == 0 ? "N" : currentGear), 20, 40);
+                g2d.drawString(String.format("RPM: %.0f", activeVehicle.getCurrentRpm()), 20, 70);
+                g2d.drawString(String.format("Speed: %.0f km/h", visualSpeed), 20, 100);
             }
 
-            if (currentState == GameStage.PAUSED) desenharMenuPause(g2d);
+            if (currentState == GameStage.PAUSED) desenharMenuPause(g2d, virtualWidthAtual);
 
         } else if (currentState == GameStage.MENU) {
-            g2d.drawImage(menuBackground, 0, 0, getWidth(), getHeight(), this);
+            g2d.drawImage(menuBackground, 0, 0, virtualWidthAtual, VIRTUAL_HEIGHT, this);
+
             if (activeVehicle != null) {
-                activeVehicle.setX(250);
-                activeVehicle.setY(380);
+                activeVehicle.setX(virtualWidthAtual / 2 - activeVehicle.getWidth() / 2);
+                activeVehicle.setY(480);
                 activeVehicle.draw(g2d, this);
             }
+
+            buttons[0].x = (virtualWidthAtual - buttons[0].width) / 2;
+            buttons[2].x = (virtualWidthAtual - buttons[2].width) / 2;
+            buttons[3].x = virtualWidthAtual - 110;
 
             for (int i = 0; i < buttonImages.length; i++) {
                 int offset = (botaoPressionado == i) ? 4 : 0;
@@ -230,32 +271,35 @@ public class GamePanel extends JPanel implements ActionListener {
             }
 
         } else if (currentState == GameStage.GARAGE) {
-            g2d.drawImage(garageBackgound, 0, 0, getWidth(), getHeight(), this);
+            g2d.drawImage(garageBackgound, 0, 0, virtualWidthAtual, VIRTUAL_HEIGHT, this);
+
+            btnProximoCarro.x = virtualWidthAtual - 260;
+            btnSelecionarCarro.x = virtualWidthAtual / 2 - btnSelecionarCarro.width / 2;
 
             if (garageCars != null && !garageCars.isEmpty()) {
                 Vehicle previewVehicle = garageCars.get(currentCarIndex);
-                previewVehicle.setX(250);
-                previewVehicle.setY(260);
+                previewVehicle.setX(virtualWidthAtual / 2 - previewVehicle.getWidth() / 2);
+                previewVehicle.setY(420);
                 previewVehicle.draw(g2d, this);
 
                 String nomeCarro = previewVehicle.name.toUpperCase();
 
-                Font fontNome = new Font("Segoe UI", Font.BOLD, 26);
+                Font fontNome = new Font("Segoe UI", Font.BOLD, 32);
                 g2d.setFont(fontNome);
                 FontMetrics fm = g2d.getFontMetrics();
 
-                int paddingX = 30;
-                int paddingY = 10;
+                int paddingX = 40;
+                int paddingY = 15;
                 int boxWidth = fm.stringWidth(nomeCarro) + (paddingX * 2);
                 int boxHeight = fm.getHeight() + (paddingY * 2);
-                int boxX = (getWidth() - boxWidth) / 2;
+                int boxX = (virtualWidthAtual - boxWidth) / 2;
                 int boxY = 140;
 
                 g2d.setColor(new Color(15, 18, 28, 220));
                 g2d.fillRoundRect(boxX, boxY, boxWidth, boxHeight, 16, 16);
 
                 g2d.setColor(new Color(255, 200, 0));
-                g2d.setStroke(new BasicStroke(2));
+                g2d.setStroke(new BasicStroke(3));
                 g2d.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 16, 16);
 
                 int textX = boxX + paddingX;
@@ -268,27 +312,36 @@ public class GamePanel extends JPanel implements ActionListener {
                 g2d.drawString(nomeCarro, textX, textY);
             }
 
-            // Botões de navegação da Garagem
             desenharBotaoMenu(g2d, btnCarroAnterior, "<", new Color(52, 152, 219));
             desenharBotaoMenu(g2d, btnProximoCarro, ">", new Color(52, 152, 219));
             desenharBotaoMenu(g2d, btnSelecionarCarro, "SELECIONAR", new Color(46, 204, 113));
+
         } else if (currentState == GameStage.CONFIG) {
-            desenharMenuConfig(g2d);
+            desenharMenuConfig(g2d, virtualWidthAtual);
         }
+
+        g2d.dispose();
     }
 
-    private void desenharMenuPause(Graphics2D g2d) {
-        g2d.drawImage(menuConfigBackground, 0, 0, getWidth(), getHeight(), this);
+    private void desenharMenuPause(Graphics2D g2d, int virtualWidth) {
+        g2d.drawImage(menuConfigBackground, 0, 0, virtualWidth, VIRTUAL_HEIGHT, this);
 
-        int menuX = 220, menuY = 70, menuW = 360, menuH = 400;
+        int menuW = 450, menuH = 500;
+        int menuX = (virtualWidth - menuW) / 2;
+        int menuY = 120;
+
         g2d.setColor(new Color(40, 42, 54));
         g2d.fillRoundRect(menuX, menuY, menuW, menuH, 20, 20);
         g2d.setColor(new Color(255, 200, 0));
         g2d.setStroke(new BasicStroke(3));
         g2d.drawRoundRect(menuX, menuY, menuW, menuH, 20, 20);
 
-        g2d.setFont(new Font("Arial", Font.BOLD, 26));
-        g2d.drawString("JOGO PAUSADO", menuX + 85, menuY + 45);
+        g2d.setFont(new Font("Arial", Font.BOLD, 28));
+        g2d.drawString("JOGO PAUSADO", menuX + 115, menuY + 60);
+
+        btnContinuar.x = menuX + 100;
+        btnIrGaragem.x = menuX + 100;
+        btnMenuPrincipal.x = menuX + 100;
 
         desenharBotaoMenu(g2d, btnContinuar, "CONTINUAR", new Color(46, 204, 113));
         desenharBotaoMenu(g2d, btnIrGaragem, "GARAGEM", new Color(52, 152, 219));
@@ -297,18 +350,24 @@ public class GamePanel extends JPanel implements ActionListener {
         desenharControlesDeVolume(g2d, menuX);
     }
 
-    private void desenharMenuConfig(Graphics2D g2d) {
-        g2d.drawImage(menuConfigBackground, 0, 0, getWidth(), getHeight(), this);
+    private void desenharMenuConfig(Graphics2D g2d, int virtualWidth) {
+        g2d.drawImage(menuConfigBackground, 0, 0, virtualWidth, VIRTUAL_HEIGHT, this);
 
-        int menuX = 220, menuY = 70, menuW = 360, menuH = 400;
+        int menuW = 450, menuH = 500;
+        int menuX = (virtualWidth - menuW) / 2;
+        int menuY = 120;
+
         g2d.setColor(new Color(40, 42, 54));
         g2d.fillRoundRect(menuX, menuY, menuW, menuH, 20, 20);
         g2d.setColor(new Color(255, 200, 0));
         g2d.setStroke(new BasicStroke(3));
         g2d.drawRoundRect(menuX, menuY, menuW, menuH, 20, 20);
 
-        g2d.setFont(new Font("Arial", Font.BOLD, 26));
-        g2d.drawString("CONFIGURAÇÃO", menuX + 85, menuY + 45);
+        g2d.setFont(new Font("Arial", Font.BOLD, 28));
+        g2d.drawString("CONFIGURAÇÃO", menuX + 115, menuY + 60);
+
+        btnIrGaragem.x = menuX + 100;
+        btnMenuPrincipal.x = menuX + 100;
 
         desenharBotaoMenu(g2d, btnIrGaragem, "GARAGEM", new Color(52, 152, 219));
         desenharBotaoMenu(g2d, btnMenuPrincipal, "MENU PRINCIPAL", new Color(231, 76, 60));
@@ -318,13 +377,18 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private void desenharControlesDeVolume(Graphics2D g2d, int menuX) {
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.setFont(new Font("Arial", Font.BOLD, 18));
 
-        g2d.drawString("MÚSICA: " + volumeMusica + "%", menuX + 130, 365);
+        btnMusicaMenos.x = menuX + 65;
+        btnMusicaMais.x = menuX + 340;
+        btnEfeitosMenos.x = menuX + 65;
+        btnEfeitosMais.x = menuX + 340;
+
+        g2d.drawString("MÚSICA: " + volumeMusica + "%", menuX + 130, 505);
         desenharBotaoMenu(g2d, btnMusicaMenos, "-", new Color(100, 100, 100));
         desenharBotaoMenu(g2d, btnMusicaMais, "+", new Color(100, 100, 100));
 
-        g2d.drawString("EFEITOS: " + volumeEfeitos + "%", menuX + 130, 415);
+        g2d.drawString("EFEITOS: " + volumeEfeitos + "%", menuX + 130, 565);
         desenharBotaoMenu(g2d, btnEfeitosMenos, "-", new Color(100, 100, 100));
         desenharBotaoMenu(g2d, btnEfeitosMais, "+", new Color(100, 100, 100));
     }
@@ -335,7 +399,7 @@ public class GamePanel extends JPanel implements ActionListener {
         g2d.setColor(Color.WHITE);
         g2d.drawRoundRect(rect.x, rect.y, rect.width, rect.height, 10, 10);
 
-        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.setFont(new Font("Arial", Font.BOLD, 18));
         FontMetrics fm = g2d.getFontMetrics();
         int textX = rect.x + (rect.width - fm.stringWidth(texto)) / 2;
         int textY = rect.y + ((rect.height - fm.getHeight()) / 2) + fm.getAscent();
