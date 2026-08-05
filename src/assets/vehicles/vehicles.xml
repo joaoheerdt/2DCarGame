@@ -3,8 +3,8 @@
 
     <vehicle id="fusca">
         <name>Fusca 1600</name>
-        <width>300</width>
-        <height>150</height>
+        <width>210</width>
+        <height>105</height>
         <wheelSize>67</wheelSize>
         <mass>800.0</mass>
         <baseTorque>150.0</baseTorque>
@@ -12,12 +12,32 @@
         <speedMax>110</speedMax>
         <gearRatios>1.0,3.8,2.0,1.2,0.9</gearRatios>
 
-        <sprites body="src/assets/vehicles/FuscaVermelho.png" wheel="src/assets/vehicles/RodaFusca.png"/>
+        <sprites body="src/assets/vehicles/fusca/FuscaVermelho.png" wheel="src/assets/vehicles/fusca/RodaFusca.png"/>
 
-        <sounds start="src/assets/vehicles/sound/fusca_start1600.wav"
-                idle="src/assets/vehicles/sound/fusca_idle1600.wav"
-                run="src/assets/vehicles/sound/fusca_run.wav"
-                stop="src/assets/vehicles/sound/fusca_stop.wav"/>
+        <sounds start="src/assets/vehicles/fusca/sound/fusca_start1600.wav"
+                idle="src/assets/vehicles/fusca/sound/fusca_idle1600.wav"
+                run="src/assets/vehicles/fusca/sound/fusca_run.wav"
+                stop="src/assets/vehicles/fusca/sound/fusca_stop.wav"
+                gear="src/assets/vehicles/fusca/sound/Gear.wav"/>
+    </vehicle>
+    <vehicle id="vectra">
+        <name>Vectra</name>
+        <width>320</width>
+        <height>150</height>
+        <wheelSize>65</wheelSize>
+        <mass>1250.0</mass>
+        <baseTorque>280.0</baseTorque>
+        <maxRpm>6000.0</maxRpm>
+        <speedMax>190</speedMax>
+        <gearRatios>1.0,3.55,1.96,1.30,0.89,0.73</gearRatios>
+
+        <sprites body="src/assets/vehicles/vectra/VectraPreto.png" wheel="src/assets/vehicles/vectra/RodaVectra.png"/>
+
+        <sounds start="src/assets/vehicles/vectra/sound/vectra_start.wav"
+                idle="src/assets/vehicles/vectra/sound/vectra_idle.wav"
+                run="src/assets/vehicles/vectra/sound/vectra_run.wav"
+                stop="src/assets/vehicles/vectra/sound/vectra_stop.wav"
+                gear="src/assets/vehicles/vectra/sound/Gear.wav"/>
     </vehicle>
 
 </vehicles>

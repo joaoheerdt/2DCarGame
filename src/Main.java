@@ -1,10 +1,9 @@
 import javax.swing.*;
 
 public class Main extends JFrame {
-
     public Main() {
         setTitle("2D Car Game");
-        setResizable(false);
+        setResizable(true);
 
         GamePanel gamePanel = new GamePanel();
         add(gamePanel);
@@ -13,7 +12,6 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
-
     public static void main(String[] args) {
         new Main();
     }
