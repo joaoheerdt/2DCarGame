@@ -195,7 +195,7 @@ public class GamePanel extends JPanel implements ActionListener {
             case 0:
                 if (activeVehicle != null) {
                     activeVehicle.setX(100);
-                    activeVehicle.setY(350);
+                    activeVehicle.setY(330);
                 }
                 currentState = GameStage.PLAYING;
                 break;
@@ -257,7 +257,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
             if (activeVehicle != null) {
                 activeVehicle.setX(virtualWidthAtual / 2 - activeVehicle.getWidth() / 2);
-                activeVehicle.setY(480);
+                activeVehicle.setY(470);
                 activeVehicle.draw(g2d, this);
             }
 
@@ -279,7 +279,7 @@ public class GamePanel extends JPanel implements ActionListener {
             if (garageCars != null && !garageCars.isEmpty()) {
                 Vehicle previewVehicle = garageCars.get(currentCarIndex);
                 previewVehicle.setX(virtualWidthAtual / 2 - previewVehicle.getWidth() / 2);
-                previewVehicle.setY(420);
+                previewVehicle.setY(340);
                 previewVehicle.draw(g2d, this);
 
                 String nomeCarro = previewVehicle.name.toUpperCase();

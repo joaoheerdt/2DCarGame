@@ -9,6 +9,7 @@ import java.io.File;
 public class Vehicle {
     public String name;
     protected int x, y, width, height, wheelSize;
+    protected int frontWheelX, frontWheelY, rearWheelX, rearWheelY;
     protected Image bodyImage, wheelImage;
     protected double speed, currentRpm, maxRpm, baseTorque, mass, speedMax;
     protected int currentGear;
@@ -31,13 +32,18 @@ public class Vehicle {
 
     protected int volumeEfeitos = 50;
 
-    public Vehicle(String name, int width, int height, int wheelSize, double mass,
-                   double baseTorque, double maxRpm, double speedMax, double[] gearRatios,
+    public Vehicle(String name, int width, int height, int wheelSize,
+                   int frontWheelX, int frontWheelY, int rearWheelX, int rearWheelY,
+                   double mass, double baseTorque, double maxRpm, double speedMax, double[] gearRatios,
                    String bodyPath, String wheelPath) {
         this.name = name;
         this.width = width;
         this.height = height;
         this.wheelSize = wheelSize;
+        this.frontWheelX = frontWheelX;
+        this.frontWheelY = frontWheelY;
+        this.rearWheelX = rearWheelX;
+        this.rearWheelY = rearWheelY;
         this.mass = mass;
         this.baseTorque = baseTorque;
         this.maxRpm = maxRpm;
@@ -47,7 +53,7 @@ public class Vehicle {
         this.wheelImage = new ImageIcon(wheelPath).getImage();
 
         this.x = 50;
-        this.y = 280;
+        this.y = 260;
         this.wheelAngle = 0;
         this.currentGear = 1;
         this.currentRpm = 0.0;
@@ -69,9 +75,18 @@ public class Vehicle {
     public int getWidth() {
         return this.width;
     }
-    public boolean isEngineOn() { return isEngineOn; }
-    public void setX(int x) { this.x = x; }
-    public void setY(int y) { this.y = y; }
+
+    public boolean isEngineOn() {
+        return isEngineOn;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
 
     public void toggleEngine() {
         if (this.isEngineOn) {
@@ -109,7 +124,8 @@ public class Vehicle {
                     if (finalVolumeDB > gainControl.getMaximum()) finalVolumeDB = gainControl.getMaximum();
                     if (finalVolumeDB < gainControl.getMinimum()) finalVolumeDB = gainControl.getMinimum();
                     gainControl.setValue(finalVolumeDB);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
 
                 clip.start();
             } catch (Exception e) {
@@ -172,14 +188,24 @@ public class Vehicle {
                     engineIdleClip.loop(Clip.LOOP_CONTINUOUSLY);
                     engineIdleClip.start();
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }).start();
     }
 
     public void stopEngineSounds() {
-        if (engineStartClip != null && engineStartClip.isRunning()) { engineStartClip.stop(); engineStartClip.close(); }
-        if (engineIdleClip != null && engineIdleClip.isRunning()) { engineIdleClip.stop(); engineIdleClip.close(); }
-        if (engineDrivingClip != null && engineDrivingClip.isRunning()) { engineDrivingClip.stop(); engineDrivingClip.close(); }
+        if (engineStartClip != null && engineStartClip.isRunning()) {
+            engineStartClip.stop();
+            engineStartClip.close();
+        }
+        if (engineIdleClip != null && engineIdleClip.isRunning()) {
+            engineIdleClip.stop();
+            engineIdleClip.close();
+        }
+        if (engineDrivingClip != null && engineDrivingClip.isRunning()) {
+            engineDrivingClip.stop();
+            engineDrivingClip.close();
+        }
     }
 
     private void setClipVolume(Clip clip, float baseVolumeDB) {
@@ -191,7 +217,8 @@ public class Vehicle {
             if (finalVolumeDB > gainControl.getMaximum()) finalVolumeDB = gainControl.getMaximum();
             if (finalVolumeDB < gainControl.getMinimum()) finalVolumeDB = gainControl.getMinimum();
             gainControl.setValue(finalVolumeDB);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     private void applyPitch(Clip clip, float baseSampleRate, double rpm) {
@@ -204,7 +231,8 @@ public class Vehicle {
             if (newRate > rateControl.getMaximum()) newRate = rateControl.getMaximum();
             if (newRate < rateControl.getMinimum()) newRate = rateControl.getMinimum();
             rateControl.setValue(newRate);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     public void updateEngineSound() {
@@ -273,7 +301,6 @@ public class Vehicle {
     public void updatePhysics(boolean isAccelerating, boolean isBraking) {
         if (!this.isEngineOn()) isAccelerating = false;
 
-        // Arrancada em marcha alta (> 1) apaga o motor
         if (this.isEngineOn() && isAccelerating && this.speed < 0.5 && this.currentGear > 1) {
             stallEngine();
             return;
@@ -325,26 +352,37 @@ public class Vehicle {
     }
 
     public void draw(Graphics2D g2d, Component component) {
-        g2d.drawImage(bodyImage, x, y, width, height, component);
 
-        int backWheelX = x + (int)(width * 0.13);
-        int frontWheelX = x + (int)(width * 0.66);
-        int wheelY = y + (int)(height * 0.53);
+
 
         AffineTransform oldTransform = g2d.getTransform();
 
-        g2d.translate(backWheelX + wheelSize / 2.0, wheelY + wheelSize / 2.0);
+        // Desenhar roda traseira usando o offset dinâmico do XML
+        g2d.translate(x + rearWheelX, y + rearWheelY);
         g2d.rotate(this.wheelAngle);
         g2d.drawImage(wheelImage, -wheelSize / 2, -wheelSize / 2, wheelSize, wheelSize, component);
         g2d.setTransform(oldTransform);
 
-        g2d.translate(frontWheelX + wheelSize / 2.0, wheelY + wheelSize / 2.0);
+        // Desenhar roda dianteira usando o offset dinâmico do XML
+        g2d.translate(x + frontWheelX, y + frontWheelY);
         g2d.rotate(this.wheelAngle);
         g2d.drawImage(wheelImage, -wheelSize / 2, -wheelSize / 2, wheelSize, wheelSize, component);
         g2d.setTransform(oldTransform);
+
+        g2d.drawImage(bodyImage, x, y, width, height, component);
+
+
     }
 
-    public double getCurrentSpeed() { return this.speed; }
-    public double getCurrentRpm() { return this.currentRpm; }
-    public int getCurrentGear() { return this.currentGear; }
+    public double getCurrentSpeed() {
+        return this.speed;
+    }
+
+    public double getCurrentRpm() {
+        return this.currentRpm;
+    }
+
+    public int getCurrentGear() {
+        return this.currentGear;
+    }
 }

@@ -11,13 +11,13 @@ public class Main extends JFrame {
         add(gamePanel, BorderLayout.CENTER);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(1280, 720));
+        setPreferredSize(new Dimension  (1280, 720));
         pack();
 
         setLocationRelativeTo(null); // Centraliza na tela
         // setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        setVisible(true); //[cite: 5]
+        setVisible(true);
     }
     public static void main(String[] args) {
         new Main();
